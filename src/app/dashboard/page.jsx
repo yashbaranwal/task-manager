@@ -153,7 +153,7 @@ export default function Dashboard() {
         <Container sx={{ mt: 4 }}>
           <Grid container spacing={3}>
             {projects.map((project) => (
-              <Grid item xs={12} md={3} key={project.id}>
+              <Grid item size={{xs:12, md:3}} key={project.id}>
                 <Card variant="outlined">
                   <CardContent>
                     <Typography variant="h5" gutterBottom>

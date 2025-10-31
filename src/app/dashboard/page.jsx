@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   Container,
   Typography,
@@ -48,7 +48,7 @@ export default function Dashboard() {
 
   if (!user) return null;
   
-  const fetchProjects = async () => {
+   const fetchProjects = useCallback(async () => {
     const res = await fetch('/api/projects');
     const data = await res.json();
     if (res.ok) {
@@ -59,12 +59,12 @@ export default function Dashboard() {
     } else {
       alert('Failed to load projects: ' + data.error);
     }
-  };
+  }, [selectedProjectId]);
 
-  useEffect(() => {
+ useEffect(() => {
     fetchProjects();
-  }, []);
-
+  }, [fetchProjects]);
+  
   const handleAddTask = async () => {
     if (!newTaskTitle || !selectedProjectId) return;
     const res = await fetch('/api/tasks', {

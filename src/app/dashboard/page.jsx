@@ -32,14 +32,8 @@ import { useSelector } from 'react-redux';
 const TASK_STATUSES = ['Todo', 'In Progress', 'Done'];
 
 export default function Dashboard() {
-   const user = useSelector((state) => state.auth.user);
   const router = useRouter();
-
-  useEffect(() => {
-    if (!user) router.push('/login');
-  }, [user, router]);
-
-  if (!user) return null;
+  const user = useSelector((state) => state.auth.user);
 
   const [projects, setProjects] = useState([]);
   const [selectedProjectId, setSelectedProjectId] = useState('');
@@ -48,6 +42,12 @@ export default function Dashboard() {
   const [editTaskTitle, setEditTaskTitle] = useState('');
   const [editTaskStatus, setEditTaskStatus] = useState('');
 
+  useEffect(() => {
+    if (!user) router.push('/login');
+  }, [user, router]);
+
+  if (!user) return null;
+  
   const fetchProjects = async () => {
     const res = await fetch('/api/projects');
     const data = await res.json();

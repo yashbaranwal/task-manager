@@ -61,7 +61,7 @@ export default function Register() {
         noValidate
         autoComplete="off"
       >
-        <Typography variant="h4" component="h1" gutterBottom align="center">
+        <Typography variant="h4" component="h1" gutterBottom align="center" color='black'>
           Register
         </Typography>
 

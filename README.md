@@ -1,36 +1,57 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+## Task Manager - Next.js 14 Project
 
-## Getting Started
+## Overview
 
-First, run the development server:
+Task Manager is a task and project management web application built with Next.js 14 using the new App Router architecture. It allows users to register, login, manage projects, and organize tasks securely using Firebase Authentication and Firestore. State management is handled by Redux Toolkit, and the UI is built with Material UI components for a polished user experience.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Features
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- User Authentication with Firebase Email/Password via secure Next.js API routes.
+- Protected routes ensuring only authenticated users access the Dashboard.
+- Dashboard showing a list of Projects, each with:
+- Project Name
+- Description
+- List of Tasks with title, status, and optional due date
+- Full CRUD operations for Tasks, supporting:
+- Adding new tasks to projects
+- Updating task status and details
+- Deleting tasks
+- Secure communication with Firebase Firestore via API routes.
+- Responsive and accessible UI components built with Material UI.
+- State management with Redux Toolkit.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## Tech Stack
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+- Next.js 14 with App Router
+- React 18
+- Firebase Admin SDK (server-side)
+- Firebase Client SDK
+- Firestore Database
+- Redux Toolkit for state management
+- Material UI for UI components
+- Tailwind CSS for utility styling
 
-## Learn More
+## Project Structure
 
-To learn more about Next.js, take a look at the following resources:
+- src/app/api/ - Contains Next.js API routes in App Router style.
+- src/lib/firebaseAdmin.js - Initializes Firebase Admin SDK for secure backend operations.
+- src/store/ - Redux Toolkit slices and store configuration.
+- src/app/ - Contains UI components and pages structured as route segments.
+- Global styles and font definitions are under src/app/globals.css.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Setup and Installation
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+- Clone the repository.
+- Install dependencies:
+- Configure Firebase:
+- Create a Firebase project and enable Email/Password Authentication and Firestore.
+- Generate a Firebase service account private key and configure the environment variables in .env.local:
 
-## Deploy on Vercel
+## Notes
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- API routes use Firebase Admin SDK for server-side security.
+- Authentication state is managed centrally with Redux Toolkit.
+- UI is fully responsive and styled with Material UI components.
+- Firestore data layout uses collections for projects and nested sub-collections for tasks.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+

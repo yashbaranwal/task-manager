@@ -23,6 +23,7 @@ import {
   Grid,
   Card,
   CardContent,
+  CircularProgress,
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import EditIcon from '@mui/icons-material/Edit';
@@ -41,30 +42,44 @@ export default function Dashboard() {
   const [editTask, setEditTask] = useState(null);
   const [editTaskTitle, setEditTaskTitle] = useState('');
   const [editTaskStatus, setEditTaskStatus] = useState('');
+  const [loading, setLoading] = useState(false);
 
+  // Redirect if no user
   useEffect(() => {
     if (!user) router.push('/login');
   }, [user, router]);
 
-  if (!user) return null;
-  
-   const fetchProjects = useCallback(async () => {
-    const res = await fetch('/api/projects');
-    const data = await res.json();
-    if (res.ok) {
-      setProjects(data);
-      if (data.length > 0 && !selectedProjectId) {
-        setSelectedProjectId(data[0].id);
+  // Fetch projects, set initial selected project if none chosen
+  const fetchProjects = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/projects');
+      const data = await res.json();
+      if (res.ok) {
+        setProjects(data);
+        if (data.length > 0 && !selectedProjectId) {
+          setSelectedProjectId(data[0].id);
+        }
+      } else {
+        alert('Failed to load projects: ' + data.error);
       }
-    } else {
-      alert('Failed to load projects: ' + data.error);
+    } finally {
+      setLoading(false);
     }
   }, [selectedProjectId]);
 
- useEffect(() => {
-    fetchProjects();
-  }, [fetchProjects]);
-  
+  // Fetch once after mount and when selectedProjectId changes
+  // But keep dependency stable to avoid infinite loops
+  useEffect(() => {
+    if (user) {
+      fetchProjects();
+    }
+  }, [user, fetchProjects]);
+
+  if (!user) return null;
+
+  const selectedProject = projects.find((p) => p.id === selectedProjectId);
+
   const handleAddTask = async () => {
     if (!newTaskTitle || !selectedProjectId) return;
     const res = await fetch('/api/tasks', {
@@ -77,7 +92,7 @@ export default function Dashboard() {
     });
     if (res.ok) {
       setNewTaskTitle('');
-      fetchProjects();
+      await fetchProjects();
     } else {
       const data = await res.json();
       alert('Failed to add task: ' + data.error);
@@ -103,7 +118,7 @@ export default function Dashboard() {
       }),
     });
     if (res.ok) {
-      fetchProjects();
+      await fetchProjects();
       setEditTask(null);
     } else {
       const data = await res.json();
@@ -117,59 +132,63 @@ export default function Dashboard() {
       method: 'DELETE',
     });
     if (res.ok) {
-      fetchProjects();
+      await fetchProjects();
     } else {
       const data = await res.json();
       alert('Failed to delete task: ' + data.error);
     }
   };
 
-  const selectedProject = projects.find((p) => p.id === selectedProjectId);
-
   return (
-    <Container sx={{ mt: 4, mb: 4, pt:4, bgcolor: 'background.paper' }}>
-      <Typography variant="h3" gutterBottom color='black'>
+    <Container sx={{ mt: 4, mb:4, pt:4, bgcolor: 'background.paper' }}>
+      <Typography variant="h3" gutterBottom color="black">
         Project Dashboard
       </Typography>
 
-      <Container sx={{ mt: 4 }}>
-      <Grid container spacing={3}>
-        {projects.map((project) => (
-          <Grid item size={{xs:12,md:3}} key={project.id}>
-            <Card variant="outlined">
-              <CardContent>
-                <Typography variant="h5" gutterBottom>
-                  {project.name}
-                </Typography>
-                <Typography variant="body2" color="text.secondary" paragraph>
-                  {project.description}
-                </Typography>
+      {loading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
+          <CircularProgress />
+        </Box>
+      ) : (
+        <Container sx={{ mt: 4 }}>
+          <Grid container spacing={3}>
+            {projects.map((project) => (
+              <Grid item xs={12} md={3} key={project.id}>
+                <Card variant="outlined">
+                  <CardContent>
+                    <Typography variant="h5" gutterBottom>
+                      {project.name}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" paragraph>
+                      {project.description}
+                    </Typography>
 
-                <Typography variant="subtitle1" gutterBottom>
-                  Tasks
-                </Typography>
-                {project.tasks.length === 0 ? (
-                  <Typography variant="body2" color="text.secondary">
-                    No tasks available.
-                  </Typography>
-                ) : (
-                  <List dense>
-                    {project.tasks.map((task) => (
-                      <ListItem key={task.id}>
-                        <ListItemText
-                          primary={task.title}
-                          secondary={`Status: ${task.status}`}
-                        />
-                      </ListItem>
-                    ))}
-                  </List>
-                )}
-              </CardContent>
-            </Card>
+                    <Typography variant="subtitle1" gutterBottom>
+                      Tasks
+                    </Typography>
+                    {project.tasks.length === 0 ? (
+                      <Typography variant="body2" color="text.secondary">
+                        No tasks available.
+                      </Typography>
+                    ) : (
+                      <List dense>
+                        {project.tasks.map((task) => (
+                          <ListItem key={task.id}>
+                            <ListItemText
+                              primary={task.title}
+                              secondary={`Status: ${task.status}`}
+                            />
+                          </ListItem>
+                        ))}
+                      </List>
+                    )}
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
           </Grid>
-        ))}
-      </Grid>
-    </Container>
+        </Container>
+      )}
 
       <FormControl fullWidth margin="normal">
         <InputLabel id="project-select-label">Select Project</InputLabel>
@@ -219,7 +238,9 @@ export default function Dashboard() {
                 >
                   <ListItemText
                     primary={task.title}
-                    secondary={`Status: ${task.status}${task.dueDate ? `, Due: ${new Date(task.dueDate).toLocaleDateString()}` : ''}`}
+                    secondary={`Status: ${task.status}${
+                      task.dueDate ? `, Due: ${new Date(task.dueDate).toLocaleDateString()}` : ''
+                    }`}
                   />
                 </ListItem>
               ))}
@@ -232,7 +253,7 @@ export default function Dashboard() {
                 onChange={(e) => setNewTaskTitle(e.target.value)}
                 fullWidth
               />
-              <Button variant="contained" onClick={handleAddTask} sx={{whiteSpace:"nowrap", width:200}}>
+              <Button variant="contained" onClick={handleAddTask} sx={{ whiteSpace: 'nowrap', width: 200 }}>
                 Add Task
               </Button>
             </Box>
